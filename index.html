@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MathPro Engineering - Herramienta de Aprendizaje</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1>MathPro Engineering</h1>
+            </div>
+            <div class="nav-links">
+                <a href="#home" class="nav-link active">Inicio</a>
+                <a href="#topics" class="nav-link">Temas</a>
+                <a href="#practice" class="nav-link">Práctica</a>
+                <a href="#progress" class="nav-link">Progreso</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <!-- Hero Section -->
+        <section id="home" class="hero-section">
+            <div class="hero-content">
+                <h1 class="hero-title">Domina las Matemáticas de Ingeniería</h1>
+                <p class="hero-subtitle">
+                    Desde aritmética básica hasta ecuaciones diferenciales. 
+                    Una herramienta completa para estudiantes de ingeniería.
+                </p>
+                <div class="hero-buttons">
+                    <button class="btn btn-primary" onclick="startLearning()">Comenzar Aprendizaje</button>
+                    <button class="btn btn-secondary" onclick="showDemo()">Ver Demo</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Topics Section -->
+        <section id="topics" class="topics-section">
+            <div class="section-header">
+                <h2>Temas Disponibles</h2>
+                <p>Explora los diferentes módulos de aprendizaje</p>
+            </div>
+            
+            <div class="topics-grid">
+                <div class="topic-card" data-topic="conjuntos">
+                    <div class="topic-icon">📊</div>
+                    <h3>Conjuntos Numéricos</h3>
+                    <p>Números reales, propiedades de operaciones, teorema fundamental de la aritmética</p>
+                    <div class="topic-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <span class="progress-text">0% completado</span>
+                    </div>
+                    <button class="btn btn-outline" onclick="openTopic('conjuntos')">Estudiar</button>
+                </div>
+
+                <div class="topic-card" data-topic="primos">
+                    <div class="topic-icon">🔢</div>
+                    <h3>Números Primos</h3>
+                    <p>Números primos, MCM, MCD, criterios de divisibilidad</p>
+                    <div class="topic-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <span class="progress-text">0% completado</span>
+                    </div>
+                    <button class="btn btn-outline" onclick="openTopic('primos')">Estudiar</button>
+                </div>
+
+                <div class="topic-card" data-topic="fraccionarios">
+                    <div class="topic-icon">➗</div>
+                    <h3>Fraccionarios</h3>
+                    <p>Operaciones con fracciones, simplificación, conversiones</p>
+                    <div class="topic-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <span class="progress-text">0% completado</span>
+                    </div>
+                    <button class="btn btn-outline" onclick="openTopic('fraccionarios')">Estudiar</button>
+                </div>
+
+                <div class="topic-card" data-topic="potenciacion">
+                    <div class="topic-icon">⚡</div>
+                    <h3>Potenciación y Radicación</h3>
+                    <p>Leyes de exponentes, radicales, operaciones con potencias</p>
+                    <div class="topic-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <span class="progress-text">0% completado</span>
+                    </div>
+                    <button class="btn btn-outline" onclick="openTopic('potenciacion')">Estudiar</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Practice Section -->
+        <section id="practice" class="practice-section">
+            <div class="section-header">
+                <h2>Zona de Práctica</h2>
+                <p>Resuelve ejercicios y pon a prueba tus conocimientos</p>
+            </div>
+            
+            <div class="practice-modes">
+                <div class="practice-card">
+                    <h3>Modo Práctica</h3>
+                    <p>Ejercicios ilimitados con retroalimentación inmediata</p>
+                    <button class="btn btn-primary" onclick="startPractice()">Practicar</button>
+                </div>
+                
+                <div class="practice-card">
+                    <h3>Modo Examen</h3>
+                    <p>Evaluaciones cronometradas para medir tu progreso</p>
+                    <button class="btn btn-primary" onclick="startExam()">Examen</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Exercise Modal -->
+        <div id="exerciseModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="exerciseTitle">Ejercicio</h3>
+                    <button class="close-btn" onclick="closeModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div id="exerciseContent">
+                        <!-- Exercise content will be loaded here -->
+                    </div>
+                    <div class="exercise-input">
+                        <input type="text" id="answerInput" placeholder="Ingresa tu respuesta">
+                        <button class="btn btn-primary" onclick="checkAnswer()">Verificar</button>
+                    </div>
+                    <div id="feedback" class="feedback"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="generateNewExercise()">Nuevo Ejercicio</button>
+                    <button class="btn btn-outline" onclick="showSolution()">Ver Solución</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2025 MathPro Engineering. Herramienta educativa para estudiantes de ingeniería.</p>
+            <!-- Agregar indicador de estado de Python -->
+            <div id="pythonStatus" class="python-status">
+                <span id="pythonIndicator">🔄 Cargando Python...</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+    <script src="js/main.js"></script>
+    
+    <!-- Agregar script para actualizar estado de Python -->
+    <script>
+        // Actualizar indicador de estado de Python
+        document.addEventListener('DOMContentLoaded', () => {
+            const indicator = document.getElementById('pythonIndicator')
+            
+            // Verificar estado cada 2 segundos
+            const checkPythonStatus = () => {
+                if (window.pyodide) {
+                    indicator.textContent = '🐍 Python Activo'
+                    indicator.style.color = '#10b981'
+                } else if (window.pythonDisponible === false) {
+                    indicator.textContent = '⚡ Modo Básico'
+                    indicator.style.color = '#f59e0b'
+                } else {
+                    indicator.textContent = '🔄 Cargando Python...'
+                    indicator.style.color = '#6b7280'
+                }
+            }
+            
+            checkPythonStatus()
+            setInterval(checkPythonStatus, 2000)
+        })
+    </script>
+</body>
+</html>
