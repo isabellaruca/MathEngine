@@ -1,4 +1,4 @@
-// --- [MATHPRO V2] ---
+// --- [MATHPRO V2.1 - CORREGIDO] ---
 // --- Variables Globales y de Estado ---
 let pyodide = null;
 let generadorPython = null; // Referencia al módulo 'generador.py'
@@ -21,8 +21,12 @@ async function inicializarEntornoPython() {
     console.log('[INIT] Iniciando carga de Pyodide...');
     indicador.textContent = '🔄 Cargando Entorno Python...';
     
-    // 1. Cargar el motor de Pyodide
-    pyodide = await loadPyodide();
+    // 1. Cargar el motor de Pyodide (ESTA ES LA LÍNEA CORREGIDA)
+    pyodide = await loadPyodide({
+        indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/"
+    });
+    // --- FIN DE LA CORRECCIÓN ---
+
     console.log('[INIT] Pyodide cargado.');
     indicador.textContent = '🐍 Obteniendo Scripts...';
 
@@ -36,7 +40,6 @@ async function inicializarEntornoPython() {
     indicador.textContent = '🐍 Preparando Sistema Virtual...';
 
     // 3. Escribir los archivos en el sistema de archivos virtual de Pyodide
-    // Esto es CRUCIAL para que el 'import' de Python funcione
     pyodide.FS.writeFile("aritmetica.py", aritmeticaCode);
     pyodide.FS.writeFile("generador.py", generadorCode);
     console.log('[INIT] Archivos escritos en el sistema virtual.');
