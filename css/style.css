@@ -528,6 +528,24 @@ body {
   animation: slideInRight 0.3s ease;
   box-shadow: var(--shadow);
   min-width: 300px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notification button {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 1rem;
+  transition: var(--transition);
+}
+
+.notification button:hover {
+  color: var(--text-primary);
 }
 
 .notification.success {
@@ -538,6 +556,11 @@ body {
 .notification.error {
   border-color: var(--accent-tertiary);
   background: rgba(255, 107, 107, 0.1);
+}
+
+.notification.info {
+  border-color: var(--accent-primary);
+  background: rgba(0, 212, 255, 0.1);
 }
 
 /* Enhanced evaluation system styles */
@@ -998,6 +1021,237 @@ body {
   border-color: var(--accent-primary);
 }
 
+/* Study Interface Styles */
+.study-interface {
+  padding: 4rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.study-header {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 3rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.study-header h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.study-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+}
+
+.study-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 2.5rem;
+  text-align: center;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.study-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.study-card:hover::before {
+  transform: scaleX(1);
+}
+
+.study-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 212, 255, 0.15);
+  border-color: var(--accent-primary);
+}
+
+.study-card h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.study-card p {
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+/* Exercise Interface Styles */
+.exercise-interface {
+  padding: 4rem 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.exercise-header {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 3rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.exercise-header h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.exercise-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 2rem;
+  box-shadow: var(--shadow);
+}
+
+.exercise-content {
+  margin-bottom: 2rem;
+}
+
+.exercise-question {
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.exercise-question h4 {
+  color: var(--accent-primary);
+  margin-bottom: 1rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.exercise-question p {
+  font-size: 1.25rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.exercise-input {
+  margin-bottom: 2rem;
+}
+
+.exercise-input label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.exercise-input input {
+  width: 100%;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
+  color: var(--text-primary);
+  font-size: 1.125rem;
+  transition: var(--transition);
+  margin-bottom: 1rem;
+}
+
+.exercise-input input:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+}
+
+.exercise-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.exercise-buttons .btn {
+  flex: 1;
+  min-width: 150px;
+}
+
+/* Progress Section Styles */
+.progress-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 2rem;
+  margin-top: 3rem;
+}
+
+.progress-section h3 {
+  color: var(--accent-primary);
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.progress-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+}
+
+.progress-item span {
+  font-weight: 500;
+}
+
+.progress-item .progress-bar {
+  width: 200px;
+  height: 8px;
+  background: var(--bg-primary);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-item .progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+  transition: width 0.3s ease;
+}
+
+/* Python Status Indicator */
+.python-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+#pythonIndicator {
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  transition: var(--transition);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .nav-container {
@@ -1068,6 +1322,36 @@ body {
     flex-direction: column;
     align-items: stretch;
   }
+
+  .study-header,
+  .exercise-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .study-options {
+    grid-template-columns: 1fr;
+  }
+
+  .exercise-buttons {
+    flex-direction: column;
+  }
+
+  .exercise-buttons .btn {
+    flex: none;
+    width: 100%;
+  }
+
+  .progress-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .progress-item .progress-bar {
+    width: 100%;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1079,5 +1363,23 @@ body {
   .btn {
     width: 100%;
     max-width: 300px;
+  }
+
+  .study-interface,
+  .exercise-interface {
+    padding: 2rem 1rem;
+  }
+
+  .study-card,
+  .exercise-container {
+    padding: 1.5rem;
+  }
+
+  .exercise-question {
+    padding: 1rem;
+  }
+
+  .exercise-question p {
+    font-size: 1.125rem;
   }
 }
