@@ -7,19 +7,132 @@ const userProgress = JSON.parse(localStorage.getItem("mathpro-progress")) || {}
 // Function to load user progress
 function loadUserProgress() {
   console.log("[v0] Cargando progreso del usuario...")
-  // Implementation to load user progress
+  const progressDisplay = document.getElementById("progressDisplay")
+  if (progressDisplay && Object.keys(userProgress).length > 0) {
+    let progressHTML = "<h3>Tu Progreso:</h3>"
+    for (const [topic, data] of Object.entries(userProgress)) {
+      const total = data.correct + data.incorrect
+      const percentage = total > 0 ? Math.round((data.correct / total) * 100) : 0
+      progressHTML += `
+        <div class="progress-item">
+          <span>${getTopicName(topic)}: ${percentage}% (${data.correct}/${total})</span>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: ${percentage}%"></div>
+          </div>
+        </div>
+      `
+    }
+    progressDisplay.innerHTML = progressHTML
+  }
 }
 
 // Function to set up event listeners
 function setupEventListeners() {
   console.log("[v0] Configurando listeners de eventos...")
-  // Implementation to set up event listeners
+
+  // Topic cards click handlers
+  document.querySelectorAll(".topic-card").forEach((card) => {
+    card.addEventListener("click", () => {
+      const topic = card.dataset.topic
+      if (topic) {
+        console.log(`[v0] Seleccionado tema: ${topic}`)
+        showStudyMode(topic)
+      }
+    })
+  })
+
+  // Study mode buttons
+  const studyBtn = document.getElementById("studyBtn")
+  const examBtn = document.getElementById("examBtn")
+  const submitBtn = document.getElementById("submitAnswer")
+  const nextBtn = document.getElementById("nextExercise")
+  const backBtn = document.getElementById("backToTopics")
+
+  if (studyBtn) {
+    studyBtn.addEventListener("click", () => {
+      const topic = studyBtn.dataset.topic
+      if (topic) {
+        console.log(`[v0] Iniciando estudio de: ${topic}`)
+        startStudyMode(topic)
+      }
+    })
+  }
+
+  if (examBtn) {
+    examBtn.addEventListener("click", () => {
+      const topic = examBtn.dataset.topic
+      if (topic) {
+        console.log(`[v0] Iniciando examen de: ${topic}`)
+        startExamMode(topic)
+      }
+    })
+  }
+
+  if (submitBtn) {
+    submitBtn.addEventListener("click", checkAnswer)
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener("click", () => {
+      const topic = nextBtn.dataset.topic
+      if (topic) {
+        generateExercise(topic)
+      }
+    })
+  }
+
+  if (backBtn) {
+    backBtn.addEventListener("click", showTopicSelection)
+  }
+
+  // Answer input enter key
+  const answerInput = document.getElementById("answerInput")
+  if (answerInput) {
+    answerInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        checkAnswer()
+      }
+    })
+  }
+
+  // Navigation smooth scrolling
+  document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+    anchor.addEventListener("click", function (e) {
+      e.preventDefault()
+      const target = document.querySelector(this.getAttribute("href"))
+      if (target) {
+        target.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        })
+      }
+    })
+  })
 }
 
 // Function to show notifications
-function showNotification(message, type) {
+function showNotification(message, type = "info") {
   console.log(`[v0] Mostrando notificación: ${message} (${type})`)
-  // Implementation to show notifications
+
+  // Remove existing notifications
+  const existingNotifications = document.querySelectorAll(".notification")
+  existingNotifications.forEach((n) => n.remove())
+
+  const notification = document.createElement("div")
+  notification.className = `notification ${type}`
+  notification.innerHTML = `
+    <span>${message}</span>
+    <button onclick="this.parentElement.remove()">&times;</button>
+  `
+
+  document.body.appendChild(notification)
+
+  // Auto remove after 5 seconds
+  setTimeout(() => {
+    if (notification.parentElement) {
+      notification.remove()
+    }
+  }, 5000)
 }
 
 // Function to get topic name
@@ -654,4 +767,85 @@ function checkAnswer() {
     `
     updateProgress(currentTopic, false)
   }
+}
+
+// Show study mode for a topic
+function showStudyMode(topic) {
+  console.log(`[v0] Mostrando modo estudio para: ${topic}`)
+
+  // Hide topic selection
+  document.getElementById("topicSelection").style.display = "none"
+
+  // Show study interface
+  const studyInterface = document.getElementById("studyInterface")
+  studyInterface.style.display = "block"
+
+  // Update buttons with topic data
+  const studyBtn = document.getElementById("studyBtn")
+  const examBtn = document.getElementById("examBtn")
+
+  if (studyBtn) {
+    studyBtn.dataset.topic = topic
+    studyBtn.textContent = `📚 Estudiar ${getTopicName(topic)}`
+  }
+
+  if (examBtn) {
+    examBtn.dataset.topic = topic
+    examBtn.textContent = `📝 Examen de ${getTopicName(topic)}`
+  }
+
+  // Update title
+  document.getElementById("studyTitle").textContent = getTopicName(topic)
+}
+
+// Start study mode
+function startStudyMode(topic) {
+  console.log(`[v0] Iniciando modo estudio: ${topic}`)
+
+  // Hide study interface
+  document.getElementById("studyInterface").style.display = "none"
+
+  // Show exercise interface
+  const exerciseInterface = document.getElementById("exerciseInterface")
+  exerciseInterface.style.display = "block"
+
+  // Set topic for buttons
+  const nextBtn = document.getElementById("nextExercise")
+  if (nextBtn) {
+    nextBtn.dataset.topic = topic
+  }
+
+  // Generate first exercise
+  generateExercise(topic)
+
+  // Update current topic
+  window.currentTopic = topic
+}
+
+// Start exam mode
+function startExamMode(topic) {
+  console.log(`[v0] Iniciando modo examen: ${topic}`)
+  showNotification("Función de examen en desarrollo", "info")
+
+  // For now, just start study mode
+  startStudyMode(topic)
+}
+
+// Show topic selection
+function showTopicSelection() {
+  console.log("[v0] Mostrando selección de temas")
+
+  // Hide all interfaces
+  document.getElementById("studyInterface").style.display = "none"
+  document.getElementById("exerciseInterface").style.display = "none"
+
+  // Show topic selection
+  document.getElementById("topicSelection").style.display = "block"
+
+  // Reset current exercise
+  currentExercise = null
+  window.currentTopic = null
+
+  // Update progress display
+  loadUserProgress()
 }
