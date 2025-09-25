@@ -443,6 +443,62 @@ body {
   color: var(--text-muted);
 }
 
+/* Agregando estilos para el indicador de estado de Python */
+.python-status {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  display: inline-block;
+}
+
+#pythonIndicator {
+  font-size: 0.875rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+  transition: var(--transition);
+}
+
+#pythonIndicator::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Estados específicos del indicador Python */
+.python-status.loading #pythonIndicator {
+  color: #6b7280;
+}
+
+.python-status.active #pythonIndicator {
+  color: #10b981;
+}
+
+.python-status.fallback #pythonIndicator {
+  color: #f59e0b;
+}
+
+.python-status.error #pythonIndicator {
+  color: var(--accent-tertiary);
+}
+
 /* Loading Spinner Styles */
 .loading-spinner {
   display: flex;
@@ -463,81 +519,69 @@ body {
   margin-bottom: 1rem;
 }
 
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes slideIn {
-  from {
-    width: 0;
-    opacity: 0;
-  }
-  to {
-    width: 20px;
-    opacity: 1;
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideUp {
-  from {
-    transform: translateY(50px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-@keyframes slideInRight {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-/* Notification System */
-.notification {
-  position: fixed;
-  top: 100px;
-  right: 20px;
-  background: var(--bg-card);
-  color: var(--text-primary);
-  padding: 1rem 2rem;
+/* Mejorando el spinner de carga con más variaciones */
+.loading-spinner.python-loading {
+  background: rgba(0, 212, 255, 0.05);
   border-radius: var(--border-radius);
-  border: 1px solid var(--border-color);
-  z-index: 3000;
-  animation: slideInRight 0.3s ease;
-  box-shadow: var(--shadow);
-  min-width: 300px;
+  margin: 2rem 0;
 }
 
-.notification.success {
-  border-color: var(--accent-secondary);
+.loading-spinner.python-loading .spinner {
+  border-color: rgba(0, 212, 255, 0.2);
+  border-top-color: var(--accent-primary);
+  width: 32px;
+  height: 32px;
+}
+
+.loading-spinner.python-loading p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Estilos para mensajes de estado mejorados */
+.status-message {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-radius: var(--border-radius);
+  margin: 1rem 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.status-message.success {
   background: rgba(0, 255, 136, 0.1);
+  border: 1px solid rgba(0, 255, 136, 0.3);
+  color: var(--accent-secondary);
 }
 
-.notification.error {
-  border-color: var(--accent-tertiary);
+.status-message.warning {
+  background: rgba(255, 165, 0, 0.1);
+  border: 1px solid rgba(255, 165, 0, 0.3);
+  color: #ffa500;
+}
+
+.status-message.info {
+  background: rgba(0, 212, 255, 0.1);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  color: var(--accent-primary);
+}
+
+.status-message.error {
   background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  color: var(--accent-tertiary);
+}
+
+.status-message::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
 }
 
 /* Enhanced evaluation system styles */
@@ -1079,5 +1123,56 @@ body {
   .btn {
     width: 100%;
     max-width: 300px;
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    width: 0;
+    opacity: 0;
+  }
+  to {
+    width: 20px;
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
   }
 }
