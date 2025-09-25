@@ -47,7 +47,7 @@
             
             <div class="topics-grid">
                 <div class="topic-card" data-topic="conjuntos_numericos">
-                    <div class="topic-icon">��</div>
+                    <div class="topic-icon">📊</div>
                     <h3>Conjuntos Numéricos</h3>
                     <p>Números reales, propiedades de operaciones, clasificación de números</p>
                     <div class="topic-progress">
@@ -104,7 +104,7 @@
         <!-- Study Interface -->
         <section id="studyInterface" class="study-interface" style="display: none;">
             <div class="study-header">
-                <button id="backToTopics" class="btn btn-outline">← Volver a Temas</button>
+                <button id="backToTopicsBtn" class="btn btn-outline">← Volver a Temas</button>
                 <h2 id="studyTitle">Tema de Estudio</h2>
             </div>
             
@@ -112,7 +112,7 @@
                 <div class="study-card">
                     <h3>📚 Modo Estudio</h3>
                     <p>Practica ejercicios con retroalimentación inmediata</p>
-                    <button id="studyBtn" class="btn btn-primary">Comenzar Estudio</button>
+                    <button id="practiceBtn" class="btn btn-primary">Comenzar Estudio</button>
                 </div>
                 
                 <div class="study-card">
@@ -126,20 +126,26 @@
         <!-- Exercise Interface -->
         <section id="exerciseInterface" class="exercise-interface" style="display: none;">
             <div class="exercise-header">
-                <button id="backToTopics" class="btn btn-outline">← Volver a Temas</button>
+                <button id="backToTopicsBtn" class="btn btn-outline">← Volver a Temas</button>
+                <button id="backToStudyModeBtn" class="btn btn-outline" style="display: none;">← Volver al Modo Estudio</button>
                 <h2 id="exerciseTitle">Ejercicio</h2>
             </div>
             
             <div class="exercise-container">
+                <div class="exercise-question">
+                    <h4>Pregunta:</h4>
+                    <p id="exerciseQuestion">Cargando ejercicio...</p>
+                </div>
+                
                 <div id="exerciseContent" class="exercise-content">
                     <!-- Exercise content will be loaded here -->
                 </div>
                 
                 <div class="exercise-input">
-                    <label for="answerInput">Tu respuesta:</label>
-                    <input type="text" id="answerInput" placeholder="Ingresa tu respuesta aquí">
+                    <label for="userAnswer">Tu respuesta:</label>
+                    <input type="text" id="userAnswer" placeholder="Ingresa tu respuesta aquí">
                     <div class="exercise-buttons">
-                        <button id="submitAnswer" class="btn btn-primary">Verificar Respuesta</button>
+                        <button id="checkAnswer" class="btn btn-primary">Verificar Respuesta</button>
                         <button id="nextExercise" class="btn btn-secondary">Siguiente Ejercicio</button>
                     </div>
                 </div>
@@ -161,8 +167,8 @@
         </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
-    <script src="js/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.18.1/full/pyodide.js"></script>
+    <script type="module" src="js/main.js"></script>
     
     <!-- Script to Update Python Status Indicator -->
     <script>
