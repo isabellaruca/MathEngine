@@ -15,9 +15,9 @@
             </div>
             <div class="nav-links">
                 <a href="#home" class="nav-link active">Inicio</a>
-                <a href="#topics" class="nav-link">Temas</a>
-                <a href="#practice" class="nav-link">Práctica</a>
-                <a href="#progress" class="nav-link">Progreso</a>
+                <a href="#topicSelection" class="nav-link">Temas</a>
+                <a href="#studyInterface" class="nav-link">Práctica</a>
+                <a href="#progressDisplay" class="nav-link">Progreso</a>
             </div>
         </div>
     </nav>
@@ -32,60 +32,57 @@
                     Una herramienta completa para estudiantes de ingeniería.
                 </p>
                 <div class="hero-buttons">
-                    <button class="btn btn-primary" onclick="startLearning()">Comenzar Aprendizaje</button>
-                    <button class="btn btn-secondary" onclick="showDemo()">Ver Demo</button>
+                    <button class="btn btn-primary" onclick="document.getElementById('topicSelection').scrollIntoView({behavior: 'smooth'})">Comenzar Aprendizaje</button>
+                    <button class="btn btn-secondary" onclick="showNotification('Demo disponible próximamente', 'info')">Ver Demo</button>
                 </div>
             </div>
         </section>
 
-        <!-- Topics Section -->
-        <section id="topics" class="topics-section">
+        <!-- Topic Selection Interface -->
+        <section id="topicSelection" class="topics-section">
             <div class="section-header">
-                <h2>Temas Disponibles</h2>
+                <h2>Selecciona un Tema</h2>
                 <p>Explora los diferentes módulos de aprendizaje</p>
             </div>
             
             <div class="topics-grid">
-                <div class="topic-card" data-topic="conjuntos">
-                    <div class="topic-icon">📊</div>
+                <div class="topic-card" data-topic="conjuntos_numericos">
+                    <div class="topic-icon">��</div>
                     <h3>Conjuntos Numéricos</h3>
-                    <p>Números reales, propiedades de operaciones, teorema fundamental de la aritmética</p>
+                    <p>Números reales, propiedades de operaciones, clasificación de números</p>
                     <div class="topic-progress">
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: 0%"></div>
                         </div>
                         <span class="progress-text">0% completado</span>
                     </div>
-                    <button class="btn btn-outline" onclick="openTopic('conjuntos')">Estudiar</button>
                 </div>
 
-                <div class="topic-card" data-topic="primos">
+                <div class="topic-card" data-topic="numeros_primos">
                     <div class="topic-icon">🔢</div>
                     <h3>Números Primos</h3>
-                    <p>Números primos, MCM, MCD, criterios de divisibilidad</p>
+                    <p>Números primos, MCM, MCD, criterios de divisibilidad, factorización</p>
                     <div class="topic-progress">
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: 0%"></div>
                         </div>
                         <span class="progress-text">0% completado</span>
                     </div>
-                    <button class="btn btn-outline" onclick="openTopic('primos')">Estudiar</button>
                 </div>
 
                 <div class="topic-card" data-topic="fraccionarios">
                     <div class="topic-icon">➗</div>
                     <h3>Fraccionarios</h3>
-                    <p>Operaciones con fracciones, simplificación, conversiones</p>
+                    <p>Operaciones con fracciones, simplificación, conversiones decimales</p>
                     <div class="topic-progress">
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: 0%"></div>
                         </div>
                         <span class="progress-text">0% completado</span>
                     </div>
-                    <button class="btn btn-outline" onclick="openTopic('fraccionarios')">Estudiar</button>
                 </div>
 
-                <div class="topic-card" data-topic="potenciacion">
+                <div class="topic-card" data-topic="potenciacion_radicacion">
                     <div class="topic-icon">⚡</div>
                     <h3>Potenciación y Radicación</h3>
                     <p>Leyes de exponentes, radicales, operaciones con potencias</p>
@@ -95,62 +92,69 @@
                         </div>
                         <span class="progress-text">0% completado</span>
                     </div>
-                    <button class="btn btn-outline" onclick="openTopic('potenciacion')">Estudiar</button>
                 </div>
+            </div>
+
+            <!-- Progress Section -->
+            <div id="progressDisplay" class="progress-section">
+                <!-- Progress will be loaded here -->
             </div>
         </section>
 
-        <!-- Practice Section -->
-        <section id="practice" class="practice-section">
-            <div class="section-header">
-                <h2>Zona de Práctica</h2>
-                <p>Resuelve ejercicios y pon a prueba tus conocimientos</p>
+        <!-- Study Interface -->
+        <section id="studyInterface" class="study-interface" style="display: none;">
+            <div class="study-header">
+                <button id="backToTopics" class="btn btn-outline">← Volver a Temas</button>
+                <h2 id="studyTitle">Tema de Estudio</h2>
             </div>
             
-            <div class="practice-modes">
-                <div class="practice-card">
-                    <h3>Modo Práctica</h3>
-                    <p>Ejercicios ilimitados con retroalimentación inmediata</p>
-                    <button class="btn btn-primary" onclick="startPractice()">Practicar</button>
+            <div class="study-options">
+                <div class="study-card">
+                    <h3>📚 Modo Estudio</h3>
+                    <p>Practica ejercicios con retroalimentación inmediata</p>
+                    <button id="studyBtn" class="btn btn-primary">Comenzar Estudio</button>
                 </div>
                 
-                <div class="practice-card">
-                    <h3>Modo Examen</h3>
-                    <p>Evaluaciones cronometradas para medir tu progreso</p>
-                    <button class="btn btn-primary" onclick="startExam()">Examen</button>
+                <div class="study-card">
+                    <h3>📝 Modo Examen</h3>
+                    <p>Evaluación cronometrada para medir tu progreso</p>
+                    <button id="examBtn" class="btn btn-secondary">Iniciar Examen</button>
                 </div>
             </div>
         </section>
 
-        <!-- Exercise Modal -->
-        <div id="exerciseModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 id="exerciseTitle">Ejercicio</h3>
-                    <button class="close-btn" onclick="closeModal()">&times;</button>
+        <!-- Exercise Interface -->
+        <section id="exerciseInterface" class="exercise-interface" style="display: none;">
+            <div class="exercise-header">
+                <button id="backToTopics" class="btn btn-outline">← Volver a Temas</button>
+                <h2 id="exerciseTitle">Ejercicio</h2>
+            </div>
+            
+            <div class="exercise-container">
+                <div id="exerciseContent" class="exercise-content">
+                    <!-- Exercise content will be loaded here -->
                 </div>
-                <div class="modal-body">
-                    <div id="exerciseContent">
-                        <!-- Exercise content will be loaded here -->
+                
+                <div class="exercise-input">
+                    <label for="answerInput">Tu respuesta:</label>
+                    <input type="text" id="answerInput" placeholder="Ingresa tu respuesta aquí">
+                    <div class="exercise-buttons">
+                        <button id="submitAnswer" class="btn btn-primary">Verificar Respuesta</button>
+                        <button id="nextExercise" class="btn btn-secondary">Siguiente Ejercicio</button>
                     </div>
-                    <div class="exercise-input">
-                        <input type="text" id="answerInput" placeholder="Ingresa tu respuesta">
-                        <button class="btn btn-primary" onclick="checkAnswer()">Verificar</button>
-                    </div>
-                    <div id="feedback" class="feedback"></div>
                 </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" onclick="generateNewExercise()">Nuevo Ejercicio</button>
-                    <button class="btn btn-outline" onclick="showSolution()">Ver Solución</button>
+                
+                <div id="feedback" class="feedback" style="display: none;">
+                    <!-- Feedback will be shown here -->
                 </div>
             </div>
-        </div>
+        </section>
     </main>
 
     <footer class="footer">
         <div class="footer-content">
             <p>&copy; 2025 MathPro Engineering. Herramienta educativa para estudiantes de ingeniería.</p>
-            <!-- Agregar indicador de estado de Python -->
+            <!-- Updated Python Status Indicator -->
             <div id="pythonStatus" class="python-status">
                 <span id="pythonIndicator">🔄 Cargando Python...</span>
             </div>
@@ -160,29 +164,29 @@
     <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
     <script src="js/main.js"></script>
     
-    <!-- Agregar script para actualizar estado de Python -->
+    <!-- Script to Update Python Status Indicator -->
     <script>
-        // Actualizar indicador de estado de Python
+        // Update Python status indicator
         document.addEventListener('DOMContentLoaded', () => {
-            const indicator = document.getElementById('pythonIndicator')
+            const indicator = document.getElementById('pythonIndicator');
             
-            // Verificar estado cada 2 segundos
+            // Check status every 2 seconds
             const checkPythonStatus = () => {
                 if (window.pyodide) {
-                    indicator.textContent = '🐍 Python Activo'
-                    indicator.style.color = '#10b981'
+                    indicator.textContent = '🐍 Python Activo';
+                    indicator.style.color = '#10b981';
                 } else if (window.pythonDisponible === false) {
-                    indicator.textContent = '⚡ Modo Básico'
-                    indicator.style.color = '#f59e0b'
+                    indicator.textContent = '⚡ Modo Básico';
+                    indicator.style.color = '#f59e0b';
                 } else {
-                    indicator.textContent = '🔄 Cargando Python...'
-                    indicator.style.color = '#6b7280'
+                    indicator.textContent = '🔄 Cargando Python...';
+                    indicator.style.color = '#6b7280';
                 }
             }
             
-            checkPythonStatus()
-            setInterval(checkPythonStatus, 2000)
-        })
+            checkPythonStatus();
+            setInterval(checkPythonStatus, 2000);
+        });
     </script>
 </body>
 </html>
