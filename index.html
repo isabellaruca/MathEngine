@@ -150,8 +150,8 @@
     <footer class="footer">
         <div class="footer-content">
             <p>&copy; 2025 MathPro Engineering. Herramienta educativa para estudiantes de ingeniería.</p>
-            <!-- Agregar indicador de estado de Python -->
-            <div id="pythonStatus" class="python-status">
+            <!-- Mejorando el indicador de estado de Python -->
+            <div id="pythonStatus" class="python-status loading">
                 <span id="pythonIndicator">🔄 Cargando Python...</span>
             </div>
         </div>
@@ -160,28 +160,36 @@
     <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
     <script src="js/main.js"></script>
     
-    <!-- Agregar script para actualizar estado de Python -->
+    <!-- Mejorando el script de estado de Python -->
     <script>
         // Actualizar indicador de estado de Python
         document.addEventListener('DOMContentLoaded', () => {
             const indicator = document.getElementById('pythonIndicator')
+            const statusContainer = document.getElementById('pythonStatus')
             
             // Verificar estado cada 2 segundos
             const checkPythonStatus = () => {
-                if (window.pyodide) {
+                if (window.pyodide && window.pythonDisponible !== false) {
                     indicator.textContent = '🐍 Python Activo'
-                    indicator.style.color = '#10b981'
+                    statusContainer.className = 'python-status active'
                 } else if (window.pythonDisponible === false) {
                     indicator.textContent = '⚡ Modo Básico'
-                    indicator.style.color = '#f59e0b'
+                    statusContainer.className = 'python-status fallback'
                 } else {
                     indicator.textContent = '🔄 Cargando Python...'
-                    indicator.style.color = '#6b7280'
+                    statusContainer.className = 'python-status loading'
                 }
             }
             
             checkPythonStatus()
-            setInterval(checkPythonStatus, 2000)
+            const statusInterval = setInterval(checkPythonStatus, 2000)
+            
+            // Limpiar intervalo después de 30 segundos para evitar verificaciones innecesarias
+            setTimeout(() => {
+                clearInterval(statusInterval)
+                // Hacer una verificación final
+                checkPythonStatus()
+            }, 30000)
         })
     </script>
 </body>
