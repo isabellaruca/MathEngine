@@ -26,7 +26,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 async function initializePyodide() {
   try {
     console.log("Cargando Pyodide...")
-    pyodide = await loadPyodide()
+
+    const loadPromise = loadPyodide({
+      indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/",
+    })
+
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Timeout cargando Pyodide")), 15000),
+    )
+
+    pyodide = await Promise.race([loadPromise, timeoutPromise])
 
     await pyodide.runPython(`
       import sys
@@ -35,18 +44,66 @@ async function initializePyodide() {
       from fractions import Fraction
       import json
       
-      # Cargar módulos personalizados
-      try:
-          # Simular la carga de nuestros módulos
-          exec(open('py/aritmetica.py').read())
-          exec(open('py/generador.py').read())
-          print("Módulos Python cargados exitosamente")
-      except Exception as e:
-          print(f"Error cargando módulos: {e}")
-          # Fallback: definir funciones básicas
-          def generar_ejercicio_basico(tema):
-              import random
-              if tema == 'conjuntos':
+      # Definir todas las funciones matemáticas directamente
+      class ConjuntosNumericos:
+          @staticmethod
+          def es_natural(n):
+              return isinstance(n, int) and n > 0
+          
+          @staticmethod
+          def es_entero(n):
+              return isinstance(n, int)
+          
+          @staticmethod
+          def es_racional(n):
+              try:
+                  Fraction(n)
+                  return True
+              except:
+                  return False
+      
+      class NumerosPrimos:
+          @staticmethod
+          def es_primo(n):
+              if n < 2:
+                  return False
+              for i in range(2, int(n**0.5) + 1):
+                  if n % i == 0:
+                      return False
+              return True
+          
+          @staticmethod
+          def mcd(a, b):
+              while b:
+                  a, b = b, a % b
+              return a
+          
+          @staticmethod
+          def mcm(a, b):
+              return abs(a * b) // NumerosPrimos.mcd(a, b)
+      
+      class Fraccionarios:
+          @staticmethod
+          def sumar_fracciones(num1, den1, num2, den2):
+              den_comun = NumerosPrimos.mcm(den1, den2)
+              num_resultado = (num1 * den_comun // den1) + (num2 * den_comun // den2)
+              mcd_resultado = NumerosPrimos.mcd(num_resultado, den_comun)
+              return num_resultado // mcd_resultado, den_comun // mcd_resultado
+      
+      class Potenciacion:
+          @staticmethod
+          def potencia(base, exponente):
+              return base ** exponente
+          
+          @staticmethod
+          def raiz_cuadrada(n):
+              return n ** 0.5
+      
+      # Generador de ejercicios mejorado
+      def generar_ejercicio_basico(tema):
+          if tema == 'conjuntos' or tema == 'conjuntos_numericos':
+              tipo = random.choice(['suma', 'resta', 'multiplicacion'])
+              if tipo == 'suma':
                   a, b = random.randint(1, 50), random.randint(1, 50)
                   return {
                       'pregunta': f'¿Cuál es el resultado de {a} + {b}?',
@@ -54,34 +111,190 @@ async function initializePyodide() {
                       'explicacion': f'{a} + {b} = {a + b}',
                       'tipo': 'suma'
                   }
-              elif tema == 'primos':
-                  numero = random.choice([7, 11, 13, 17, 19, 23, 8, 9, 10, 12, 15, 16])
-                  es_primo = numero in [7, 11, 13, 17, 19, 23]
+              elif tipo == 'resta':
+                  a, b = random.randint(20, 100), random.randint(1, 19)
+                  return {
+                      'pregunta': f'¿Cuál es el resultado de {a} - {b}?',
+                      'respuesta': a - b,
+                      'explicacion': f'{a} - {b} = {a - b}',
+                      'tipo': 'resta'
+                  }
+              else:
+                  a, b = random.randint(2, 12), random.randint(2, 12)
+                  return {
+                      'pregunta': f'¿Cuál es el resultado de {a} × {b}?',
+                      'respuesta': a * b,
+                      'explicacion': f'{a} × {b} = {a * b}',
+                      'tipo': 'multiplicacion'
+                  }
+          
+          elif tema == 'primos' or tema == 'numeros_primos':
+              tipo = random.choice(['identificar_primo', 'mcd', 'mcm'])
+              if tipo == 'identificar_primo':
+                  numero = random.choice([7, 11, 13, 17, 19, 23, 29, 8, 9, 10, 12, 15, 16, 18])
+                  es_primo = NumerosPrimos.es_primo(numero)
                   return {
                       'pregunta': f'¿Es {numero} un número primo? (1 para sí, 0 para no)',
                       'respuesta': 1 if es_primo else 0,
                       'explicacion': f'{numero} {"es" if es_primo else "no es"} primo',
-                      'tipo': 'primo'
+                      'tipo': 'identificar_primo'
                   }
-              elif tema == 'fraccionarios':
+              elif tipo == 'mcd':
+                  a, b = random.randint(6, 24), random.randint(6, 24)
+                  resultado = NumerosPrimos.mcd(a, b)
                   return {
-                      'pregunta': '¿Cuál es el resultado de 1/2 + 1/4?',
-                      'respuesta': '3/4',
-                      'explicacion': '1/2 + 1/4 = 2/4 + 1/4 = 3/4',
+                      'pregunta': f'¿Cuál es el MCD de {a} y {b}?',
+                      'respuesta': resultado,
+                      'explicacion': f'MCD({a}, {b}) = {resultado}',
+                      'tipo': 'mcd'
+                  }
+              else:
+                  a, b = random.randint(3, 8), random.randint(3, 8)
+                  resultado = NumerosPrimos.mcm(a, b)
+                  return {
+                      'pregunta': f'¿Cuál es el MCM de {a} y {b}?',
+                      'respuesta': resultado,
+                      'explicacion': f'MCM({a}, {b}) = {resultado}',
+                      'tipo': 'mcm'
+                  }
+          
+          elif tema == 'fraccionarios':
+              tipo = random.choice(['suma_fracciones', 'simplificacion'])
+              if tipo == 'suma_fracciones':
+                  num1, den1 = random.randint(1, 5), random.randint(2, 8)
+                  num2, den2 = random.randint(1, 5), random.randint(2, 8)
+                  num_res, den_res = Fraccionarios.sumar_fracciones(num1, den1, num2, den2)
+                  return {
+                      'pregunta': f'¿Cuál es el resultado de {num1}/{den1} + {num2}/{den2}? (formato: numerador/denominador)',
+                      'respuesta': f'{num_res}/{den_res}',
+                      'explicacion': f'{num1}/{den1} + {num2}/{den2} = {num_res}/{den_res}',
                       'tipo': 'suma_fracciones'
                   }
-              else:  # potenciacion
-                  base = random.randint(2, 5)
-                  exp = random.randint(2, 3)
+              else:
+                  num = random.randint(2, 12)
+                  den = random.randint(4, 16)
+                  mcd = NumerosPrimos.mcd(num, den)
+                  if mcd > 1:
+                      return {
+                          'pregunta': f'Simplifica la fracción {num}/{den} (formato: numerador/denominador)',
+                          'respuesta': f'{num//mcd}/{den//mcd}',
+                          'explicacion': f'{num}/{den} = {num//mcd}/{den//mcd} (dividiendo por {mcd})',
+                          'tipo': 'simplificacion'
+                      }
+                  else:
+                      return generar_ejercicio_basico('fraccionarios')
+          
+          else:  # potenciacion_radicacion
+              tipo = random.choice(['potencia', 'raiz_cuadrada'])
+              if tipo == 'potencia':
+                  base = random.randint(2, 6)
+                  exp = random.randint(2, 4)
+                  resultado = Potenciacion.potencia(base, exp)
                   return {
                       'pregunta': f'¿Cuál es el resultado de {base}^{exp}?',
-                      'respuesta': base ** exp,
-                      'explicacion': f'{base}^{exp} = {base ** exp}',
+                      'respuesta': resultado,
+                      'explicacion': f'{base}^{exp} = {resultado}',
                       'tipo': 'potencia'
                   }
+              else:
+                  numeros_cuadrados = [4, 9, 16, 25, 36, 49, 64, 81, 100]
+                  numero = random.choice(numeros_cuadrados)
+                  resultado = int(Potenciacion.raiz_cuadrada(numero))
+                  return {
+                      'pregunta': f'¿Cuál es el resultado de √{numero}?',
+                      'respuesta': resultado,
+                      'explicacion': f'√{numero} = {resultado}',
+                      'tipo': 'raiz_cuadrada'
+                  }
+      
+      # Generador de exámenes
+      def generar_examen_tema(tema, num_preguntas, dificultad):
+          examen = []
+          for i in range(num_preguntas):
+              ejercicio = generar_ejercicio_basico(tema)
+              ejercicio['numero'] = i + 1
+              ejercicio['tema'] = tema
+              ejercicio['dificultad'] = dificultad
+              examen.append(ejercicio)
+          return examen
+      
+      # Evaluador de exámenes
+      def evaluar_examen(examen_data, respuestas_data):
+          correctas = 0
+          total = len(examen_data)
+          detalles = []
+          
+          for i, (pregunta, respuesta) in enumerate(zip(examen_data, respuestas_data)):
+              respuesta_correcta = str(pregunta['respuesta']).lower().strip()
+              respuesta_usuario = respuesta.lower().strip()
+              
+              # Comparación inteligente
+              es_correcta = False
+              try:
+                  if '/' in respuesta_correcta and '/' in respuesta_usuario:
+                      # Comparar fracciones
+                      es_correcta = respuesta_correcta == respuesta_usuario
+                  else:
+                      # Comparar números
+                      num_correcta = float(respuesta_correcta)
+                      num_usuario = float(respuesta_usuario)
+                      es_correcta = abs(num_correcta - num_usuario) < 0.01
+              except:
+                  es_correcta = respuesta_correcta == respuesta_usuario
+              
+              if es_correcta:
+                  correctas += 1
+              
+              detalles.append({
+                  'numero': i + 1,
+                  'pregunta': pregunta['pregunta'],
+                  'respuesta_usuario': respuesta,
+                  'respuesta_correcta': pregunta['respuesta'],
+                  'es_correcta': es_correcta,
+                  'explicacion': pregunta['explicacion'],
+                  'pasos': [],
+                  'puntos': 1 if es_correcta else 0,
+                  'tipo': pregunta.get('tipo', 'basico')
+              })
+          
+          porcentaje = (correctas / total) * 100 if total > 0 else 0
+          
+          # Generar recomendaciones
+          recomendaciones = []
+          if porcentaje < 60:
+              recomendaciones.append("Revisa los conceptos básicos del tema")
+              recomendaciones.append("Practica más ejercicios similares")
+          elif porcentaje < 80:
+              recomendaciones.append("Buen progreso, continúa practicando")
+              recomendaciones.append("Enfócate en los tipos de ejercicios donde tuviste errores")
+          else:
+              recomendaciones.append("¡Excelente trabajo!")
+              recomendaciones.append("Puedes intentar ejercicios de mayor dificultad")
+          
+          return {
+              'correctas': correctas,
+              'incorrectas': total - correctas,
+              'total': total,
+              'porcentaje': porcentaje,
+              'puntos_obtenidos': correctas,
+              'puntos_totales': total,
+              'calificacion': 'Excelente' if porcentaje >= 90 else 'Bueno' if porcentaje >= 70 else 'Regular',
+              'nivel_dominio': 'Avanzado' if porcentaje >= 90 else 'Intermedio' if porcentaje >= 70 else 'Básico',
+              'detalles': detalles,
+              'recomendaciones': recomendaciones
+          }
+      
+      print("Módulos Python cargados exitosamente")
     `)
 
     console.log("Pyodide cargado exitosamente")
+    window.pythonDisponible = true
+
+    const loadingElement = document.querySelector(".loading-status")
+    if (loadingElement) {
+      loadingElement.textContent = "Python cargado correctamente"
+      loadingElement.style.color = "#4ade80"
+    }
   } catch (error) {
     console.error("Error cargando Pyodide:", error)
     activarModoFallback()
