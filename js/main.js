@@ -168,25 +168,116 @@ function startStudyMode(topic) {
 }
 
 async function generateExercise(topic) {
+  console.log(`[v0] Generando ejercicio para tema: ${topic}`)
+
   if (!pyodide) {
+    console.log("[v0] Pyodide no está disponible, usando modo fallback")
     showNotification("El entorno de Python no está listo.", "error")
     return
   }
-  console.log(`[v0] Generando ejercicio para: ${topic}`)
-  try {
-    const generar = pyodide.globals.get("generar_ejercicio_tema")
-    const exerciseData = generar(topic, "medio").toJs()
 
-    currentExercise = Object.fromEntries(exerciseData)
+  try {
+    console.log("[v0] Verificando función generar_ejercicio_tema...")
+    const generar = pyodide.globals.get("generar_ejercicio_tema")
+
+    if (!generar) {
+      console.error("[v0] La función 'generar_ejercicio_tema' no está disponible")
+      throw new Error("Función Python no disponible")
+    }
+
+    console.log("[v0] Función encontrada, generando ejercicio...")
+    const exerciseData = generar(topic, "medio")
+
+    let exerciseObj
+    if (exerciseData && typeof exerciseData.toJs === "function") {
+      exerciseObj = Object.fromEntries(exerciseData.toJs())
+    } else {
+      // Si no es un dict de Python, intentar usar directamente
+      exerciseObj = exerciseData
+    }
+
+    console.log("[v0] Ejercicio generado:", exerciseObj)
+    currentExercise = exerciseObj
+
+    if (!currentExercise || !currentExercise.pregunta) {
+      throw new Error("El ejercicio generado no tiene el formato correcto")
+    }
 
     document.getElementById("exerciseQuestion").textContent = currentExercise.pregunta
     document.getElementById("userAnswer").value = ""
     document.getElementById("feedback").innerHTML = ""
 
     generar.destroy()
+    console.log("[v0] Ejercicio mostrado exitosamente")
   } catch (error) {
-    console.error("Error al generar ejercicio:", error)
-    showNotification("No se pudo generar el ejercicio.", "error")
+    console.error("[v0] Error generando ejercicio:", error)
+    console.log("[v0] Usando modo fallback para generar ejercicio")
+
+    const fallbackExercises = {
+      conjuntos_numericos: [
+        {
+          pregunta: "¿Cuál es el resultado de 15 + 23?",
+          respuesta: "38",
+          explicacion: "15 + 23 = 38. Suma básica de números naturales.",
+        },
+        {
+          pregunta: "¿Es el número 17 primo? (Responde 'si' o 'no')",
+          respuesta: "si",
+          explicacion: "17 es primo porque solo es divisible por 1 y 17.",
+        },
+        {
+          pregunta: "¿Cuál es el valor absoluto de -12?",
+          respuesta: "12",
+          explicacion: "|-12| = 12. El valor absoluto es la distancia al cero.",
+        },
+      ],
+      numeros_primos: [
+        {
+          pregunta: "¿Es 21 un número primo? (Responde 'si' o 'no')",
+          respuesta: "no",
+          explicacion: "21 no es primo porque es divisible por 1, 3, 7 y 21.",
+        },
+        {
+          pregunta: "¿Cuál es el MCD de 12 y 18?",
+          respuesta: "6",
+          explicacion: "MCD(12, 18) = 6. Es el mayor divisor común.",
+        },
+      ],
+      fraccionarios: [
+        {
+          pregunta: "¿Cuál es el resultado de 1/2 + 1/4?",
+          respuesta: "3/4",
+          explicacion: "1/2 + 1/4 = 2/4 + 1/4 = 3/4",
+        },
+        {
+          pregunta: "Simplifica la fracción 6/8",
+          respuesta: "3/4",
+          explicacion: "6/8 = 3/4 (dividimos numerador y denominador por 2)",
+        },
+      ],
+      potenciacion_radicacion: [
+        {
+          pregunta: "¿Cuál es el resultado de 3^4?",
+          respuesta: "81",
+          explicacion: "3^4 = 3 × 3 × 3 × 3 = 81",
+        },
+        {
+          pregunta: "¿Cuál es la raíz cuadrada de 64?",
+          respuesta: "8",
+          explicacion: "√64 = 8 porque 8² = 64",
+        },
+      ],
+    }
+
+    const exercises = fallbackExercises[topic] || fallbackExercises.conjuntos_numericos
+    const randomExercise = exercises[Math.floor(Math.random() * exercises.length)]
+
+    currentExercise = randomExercise
+    document.getElementById("exerciseQuestion").textContent = currentExercise.pregunta
+    document.getElementById("userAnswer").value = ""
+    document.getElementById("feedback").innerHTML = ""
+
+    showNotification("Usando ejercicios básicos (Python no disponible)", "info")
   }
 }
 
