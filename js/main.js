@@ -1,4 +1,4 @@
-// --- [MATHPRO V2.1 - CORREGIDO] ---
+// --- [MATHPRO V2.2 - FINAL] ---
 // --- Variables Globales y de Estado ---
 let pyodide = null;
 let generadorPython = null; // Referencia al módulo 'generador.py'
@@ -21,9 +21,9 @@ async function inicializarEntornoPython() {
     console.log('[INIT] Iniciando carga de Pyodide...');
     indicador.textContent = '🔄 Cargando Entorno Python...';
     
-    // 1. Cargar el motor de Pyodide, incluyendo el 'indexURL' requerido
+    // 1. Cargar el motor de Pyodide (ESTA ES LA LÍNEA CORREGIDA Y FINAL)
     pyodide = await loadPyodide({
-        indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/"
+        indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full" // URL correcta sin la barra al final
     });
 
     console.log('[INIT] Pyodide cargado.');
@@ -122,11 +122,9 @@ function generarEjercicio(tema) {
     return;
   }
   try {
-    // Llama a la función del módulo Python importado
     const ejercicioProxy = generadorPython.generar_ejercicio_tema(tema, 'medio');
-    // Convierte el resultado de Python a un objeto de JavaScript
     currentExercise = ejercicioProxy.toJs({ dict_converter: Object.fromEntries });
-    ejercicioProxy.destroy(); // Libera memoria
+    ejercicioProxy.destroy();
 
     document.getElementById("exerciseQuestion").textContent = currentExercise.pregunta;
     document.getElementById("userAnswer").value = "";
@@ -144,7 +142,6 @@ function revisarRespuesta() {
   const respuestaUsuario = document.getElementById("userAnswer").value.trim();
   const feedbackEl = document.getElementById("feedback");
   
-  // Usar '==' para una comparación flexible (string vs número)
   if (respuestaUsuario == currentExercise.respuesta) {
     feedbackEl.innerHTML = `<p class="correct">✅ ¡Correcto!</p><p><strong>Explicación:</strong> ${currentExercise.explicacion}</p>`;
     mostrarNotificacion("¡Respuesta Correcta!", "success");
@@ -190,12 +187,11 @@ function configurarEventListeners() {
 document.addEventListener("DOMContentLoaded", () => {
   console.log('[APP] DOM cargado. Iniciando aplicación.');
   
-  // Deshabilitar la UI por defecto hasta que todo esté listo
   document.querySelectorAll(".topic-card, .btn").forEach(el => {
       el.classList.add('disabled');
       el.disabled = true;
   });
 
   configurarEventListeners();
-  inicializarEntornoPython(); // Inicia la carga de Pyodide
+  inicializarEntornoPython();
 });
