@@ -1,197 +1,255 @@
-// --- [MATHPRO V2.2 - FINAL] ---
-// --- Variables Globales y de Estado ---
-let pyodide = null;
-let generadorPython = null; // Referencia al módulo 'generador.py'
+// --- Variables Globales ---
+let pyodide = null
+let currentExercise = null
+const currentExam = null
+let currentTopic = null
+const userProgress = JSON.parse(localStorage.getItem("mathpro-progress")) || {}
+window.pythonDisponible = false // Variable global para el indicador de estado
 
-const AppState = {
-  LOADING: 'loading',
-  READY: 'ready',
-  ERROR: 'error'
-};
-let appStatus = AppState.LOADING;
+// Import Pyodide
+const { loadPyodide } = window
 
-let currentTopic = null;
-let currentExercise = null;
+// --- Función Principal de Inicialización ---
+async function main() {
+  const pythonIndicator = document.getElementById("pythonIndicator")
 
-// --- Función Principal de Inicialización del Entorno Python ---
-async function inicializarEntornoPython() {
-  const indicador = document.getElementById('pythonIndicator');
-  
+  console.log("[v0] Iniciando carga de Python...")
+  console.log("[v0] Verificando disponibilidad de loadPyodide:", typeof window.loadPyodide)
+
   try {
-    console.log('[INIT] Iniciando carga de Pyodide...');
-    indicador.textContent = '🔄 Cargando Entorno Python...';
-    
-    // 1. Cargar el motor de Pyodide (ESTA ES LA LÍNEA CORREGIDA Y FINAL)
-    pyodide = await loadPyodide({
-        indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full" // URL correcta sin la barra al final
-    });
+    if (typeof window.loadPyodide === "undefined") {
+      throw new Error(
+        "loadPyodide no está disponible. Verifica que el script de Pyodide se haya cargado correctamente.",
+      )
+    }
 
-    console.log('[INIT] Pyodide cargado.');
-    indicador.textContent = '🐍 Obteniendo Scripts...';
+    console.log("[v0] Cargando Pyodide...")
+    pythonIndicator.textContent = "🔄 Cargando Pyodide..."
+    pyodide = await window.loadPyodide()
+    console.log("[v0] Pyodide cargado exitosamente")
 
-    // 2. Descargar el código de tus archivos .py
-    console.log('[INIT] Descargando archivos aritmetica.py y generador.py...');
-    const [aritmeticaCode, generadorCode] = await Promise.all([
-      fetch('./aritmetica.py').then(res => res.text()),
-      fetch('./generador.py').then(res => res.text())
-    ]);
-    console.log('[INIT] Scripts descargados correctamente.');
-    indicador.textContent = '🐍 Preparando Sistema Virtual...';
+    console.log("[v0] Intentando cargar archivos de Python...")
+    pythonIndicator.textContent = "🐍 Cargando Módulos..."
 
-    // 3. Escribir los archivos en el sistema de archivos virtual de Pyodide
-    pyodide.FS.writeFile("aritmetica.py", aritmeticaCode);
-    pyodide.FS.writeFile("generador.py", generadorCode);
-    console.log('[INIT] Archivos escritos en el sistema virtual.');
-    indicador.textContent = '🐍 Compilando Módulos...';
-    
-    // 4. Importar el módulo principal de Python
-    generadorPython = pyodide.pyimport("generador");
-    console.log('[INIT] Módulo "generador" importado con éxito.');
+    console.log("[v0] Verificando archivo aritmetica.py...")
+    const aritmeticaResponse = await fetch("./py/aritmetica.py")
+    console.log("[v0] Respuesta aritmetica.py:", aritmeticaResponse.status, aritmeticaResponse.statusText)
 
-    // 5. Entorno listo
-    appStatus = AppState.READY;
-    indicador.textContent = '✅ Python Activo';
-    console.log('✅ ¡Entorno Python listo para usarse!');
-    habilitarInterfaz();
+    if (!aritmeticaResponse.ok) {
+      throw new Error(`No se pudo cargar aritmetica.py: ${aritmeticaResponse.status} ${aritmeticaResponse.statusText}`)
+    }
 
-  } catch (error) {
-    appStatus = AppState.ERROR;
-    indicador.textContent = '⚡ Error (Modo Básico)';
-    console.error('❌ Error Crítico al inicializar el entorno Python:', error);
-    mostrarNotificacion("Error al cargar los módulos. La app funcionará en modo básico.", "error");
-  }
-}
+    const aritmeticaPy = await aritmeticaResponse.text()
+    console.log("[v0] Contenido de aritmetica.py cargado, longitud:", aritmeticaPy.length)
 
-// --- Funciones de la Interfaz de Usuario (UI) ---
+    console.log("[v0] Verificando archivo generador.py...")
+    const generadorResponse = await fetch("./py/generador.py")
+    console.log("[v0] Respuesta generador.py:", generadorResponse.status, generadorResponse.statusText)
 
-function habilitarInterfaz() {
-  document.querySelectorAll(".topic-card, .btn").forEach(el => {
-    el.classList.remove('disabled');
-    el.disabled = false;
-  });
-  console.log('[UI] Interfaz de usuario HABILITADA.');
-}
+    if (!generadorResponse.ok) {
+      throw new Error(`No se pudo cargar generador.py: ${generadorResponse.status} ${generadorResponse.statusText}`)
+    }
 
-function mostrarNotificacion(mensaje, tipo = 'info') {
-  const notificacion = document.createElement('div');
-  notificacion.className = `notification ${tipo}`;
-  notificacion.textContent = mensaje;
-  document.body.appendChild(notificacion);
-  setTimeout(() => notificacion.remove(), 4000);
-}
+    const generadorPy = await generadorResponse.text()
+    console.log("[v0] Contenido de generador.py cargado, longitud:", generadorPy.length)
 
-function obtenerNombreTema(topicId) {
-    const nombres = {
-        'conjuntos_numericos': 'Conjuntos Numéricos',
-        'numeros_primos': 'Números Primos',
-        'fraccionarios': 'Fraccionarios',
-        'potenciacion_radicacion': 'Potenciación y Radicación'
-    };
-    return nombres[topicId] || topicId;
-}
+    console.log("[v0] Ejecutando aritmetica.py...")
+    try {
+      pyodide.runPython(aritmeticaPy)
+      console.log("[v0] Módulo 'aritmetica.py' ejecutado exitosamente")
+    } catch (pythonError) {
+      console.error("[v0] Error al ejecutar aritmetica.py:", pythonError)
+      throw new Error(`Error en aritmetica.py: ${pythonError.message}`)
+    }
 
+    console.log("[v0] Ejecutando generador.py...")
+    try {
+      pyodide.runPython(generadorPy)
+      console.log("[v0] Módulo 'generador.py' ejecutado exitosamente")
+    } catch (pythonError) {
+      console.error("[v0] Error al ejecutar generador.py:", pythonError)
+      throw new Error(`Error en generador.py: ${pythonError.message}`)
+    }
 
-// --- Lógica Principal de la Aplicación ---
-
-function mostrarModoEstudio(tema) {
-  currentTopic = tema;
-  document.getElementById("topicSelection").style.display = "none";
-  const studyInterface = document.getElementById("studyInterface");
-  studyInterface.style.display = "block";
-  document.getElementById("exerciseInterface").style.display = "none";
-  
-  document.getElementById("studyTitle").textContent = obtenerNombreTema(tema);
-  document.getElementById("practiceBtn").onclick = () => iniciarModoPractica(tema);
-  document.getElementById("examBtn").onclick = () => iniciarModoExamen(tema);
-}
-
-function iniciarModoPractica(tema) {
-  document.getElementById("studyInterface").style.display = "none";
-  document.getElementById("exerciseInterface").style.display = "block";
-  generarEjercicio(tema);
-}
-
-function iniciarModoExamen(tema) {
-    mostrarNotificacion("La función de examen aún está en desarrollo.", "info");
-    iniciarModoPractica(tema); // Temporal
-}
-
-function generarEjercicio(tema) {
-  if (appStatus !== AppState.READY) {
-    mostrarNotificacion("El entorno de Python no está disponible.", "error");
-    return;
-  }
-  try {
-    const ejercicioProxy = generadorPython.generar_ejercicio_tema(tema, 'medio');
-    currentExercise = ejercicioProxy.toJs({ dict_converter: Object.fromEntries });
-    ejercicioProxy.destroy();
-
-    document.getElementById("exerciseQuestion").textContent = currentExercise.pregunta;
-    document.getElementById("userAnswer").value = "";
-    document.getElementById("feedback").innerHTML = "";
-
-  } catch (error) {
-    console.error(`Error al generar ejercicio para '${tema}':`, error);
-    mostrarNotificacion("Hubo un error al crear el ejercicio.", "error");
-  }
-}
-
-function revisarRespuesta() {
-  if (!currentExercise) return;
-  
-  const respuestaUsuario = document.getElementById("userAnswer").value.trim();
-  const feedbackEl = document.getElementById("feedback");
-  
-  if (respuestaUsuario == currentExercise.respuesta) {
-    feedbackEl.innerHTML = `<p class="correct">✅ ¡Correcto!</p><p><strong>Explicación:</strong> ${currentExercise.explicacion}</p>`;
-    mostrarNotificacion("¡Respuesta Correcta!", "success");
-  } else {
-    feedbackEl.innerHTML = `<p class="incorrect">❌ Incorrecto. La respuesta era: <strong>${currentExercise.respuesta}</strong></p><p><strong>Explicación:</strong> ${currentExercise.explicacion}</p>`;
-    mostrarNotificacion("Respuesta incorrecta. ¡Sigue intentando!", "error");
-  }
-}
-
-function volverAMenu() {
-    document.getElementById("studyInterface").style.display = "none";
-    document.getElementById("exerciseInterface").style.display = "none";
-    document.getElementById("topicSelection").style.display = "block";
-    currentTopic = null;
-    currentExercise = null;
-}
-
-// --- Configuración Inicial y Eventos ---
-
-function configurarEventListeners() {
-  document.querySelectorAll(".topic-card").forEach(card => {
-    card.addEventListener("click", () => {
-      if (appStatus === AppState.READY) {
-        mostrarModoEstudio(card.dataset.topic);
-      } else {
-        mostrarNotificacion("El entorno Python aún se está cargando...", "info");
+    console.log("[v0] Verificando funciones Python disponibles...")
+    try {
+      const generar = pyodide.globals.get("generar_ejercicio_tema")
+      if (!generar) {
+        throw new Error("La función 'generar_ejercicio_tema' no está disponible")
       }
-    });
-  });
+      console.log("[v0] Función 'generar_ejercicio_tema' encontrada")
+      generar.destroy()
+    } catch (verifyError) {
+      console.error("[v0] Error al verificar funciones Python:", verifyError)
+      throw verifyError
+    }
 
-  document.getElementById("checkAnswer").addEventListener("click", revisarRespuesta);
-  document.getElementById("nextExercise").addEventListener("click", () => {
-    if (currentTopic) generarEjercicio(currentTopic);
-  });
-  
-  document.getElementById("backToTopicsBtn").addEventListener("click", volverAMenu);
-  document.getElementById("backToStudyModeBtn").addEventListener("click", () => {
-      if (currentTopic) mostrarModoEstudio(currentTopic);
-  });
+    // Marcamos Python como listo y activamos la UI
+    window.pythonDisponible = true
+    pythonIndicator.textContent = "🐍 Python Activo"
+    console.log("[v0] ¡Entorno de Python completamente listo!")
+
+    enableUI()
+  } catch (error) {
+    console.error("[v0] Error detallado al cargar el entorno de Python:", error)
+    console.error("[v0] Stack trace:", error.stack)
+    pythonIndicator.textContent = "⚡ Modo Básico (Error)"
+    window.pythonDisponible = false
+
+    showNotification(`Error de Python: ${error.message}`, "error")
+  }
 }
 
-// --- Punto de Entrada de la Aplicación ---
-document.addEventListener("DOMContentLoaded", () => {
-  console.log('[APP] DOM cargado. Iniciando aplicación.');
-  
-  document.querySelectorAll(".topic-card, .btn").forEach(el => {
-      el.classList.add('disabled');
-      el.disabled = true;
-  });
+// --- Lógica de la Aplicación ---
 
-  configurarEventListeners();
-  inicializarEntornoPython();
-});
+function enableUI() {
+  // Activa los botones y otros elementos interactivos
+  document.querySelectorAll(".topic-card, .btn").forEach((el) => {
+    el.classList.remove("disabled")
+    el.disabled = false
+  })
+  console.log("[v0] Interfaz de usuario habilitada.")
+}
+
+function getTopicName(topicId) {
+  const names = {
+    conjuntos_numericos: "Conjuntos Numéricos",
+    numeros_primos: "Números Primos",
+    fraccionarios: "Fraccionarios",
+    potenciacion_radicacion: "Potenciación y Radicación",
+  }
+  return names[topicId] || topicId
+}
+
+function showNotification(message, type = "success") {
+  const notification = document.createElement("div")
+  notification.className = `notification ${type}`
+  notification.textContent = message
+  document.body.appendChild(notification)
+  setTimeout(() => {
+    notification.remove()
+  }, 3000)
+}
+
+// --- Funciones de la Interfaz ---
+
+function showStudyMode(topic) {
+  console.log(`[v0] Mostrando modo de estudio para: ${topic}`)
+  document.getElementById("topicSelection").style.display = "none"
+  const studyInterface = document.getElementById("studyInterface")
+  studyInterface.style.display = "block"
+
+  document.getElementById("studyTitle").textContent = getTopicName(topic)
+  document.getElementById("practiceBtn").onclick = () => startStudyMode(topic)
+  document.getElementById("examBtn").onclick = () => startExamMode(topic)
+}
+
+function startStudyMode(topic) {
+  console.log(`[v0] Iniciando modo estudio: ${topic}`)
+  currentTopic = topic
+  document.getElementById("studyInterface").style.display = "none"
+  document.getElementById("exerciseInterface").style.display = "block"
+  document.getElementById("backToTopicsBtn").style.display = "block"
+  document.getElementById("backToStudyModeBtn").style.display = "none"
+
+  generateExercise(topic)
+}
+
+async function generateExercise(topic) {
+  if (!pyodide) {
+    showNotification("El entorno de Python no está listo.", "error")
+    return
+  }
+  console.log(`[v0] Generando ejercicio para: ${topic}`)
+  try {
+    const generar = pyodide.globals.get("generar_ejercicio_tema")
+    const exerciseData = generar(topic, "medio").toJs()
+
+    currentExercise = Object.fromEntries(exerciseData)
+
+    document.getElementById("exerciseQuestion").textContent = currentExercise.pregunta
+    document.getElementById("userAnswer").value = ""
+    document.getElementById("feedback").innerHTML = ""
+
+    generar.destroy()
+  } catch (error) {
+    console.error("Error al generar ejercicio:", error)
+    showNotification("No se pudo generar el ejercicio.", "error")
+  }
+}
+
+function checkAnswer() {
+  if (!currentExercise) return
+
+  const userAnswer = document.getElementById("userAnswer").value.trim()
+  const feedbackEl = document.getElementById("feedback")
+
+  if (userAnswer == currentExercise.respuesta) {
+    feedbackEl.innerHTML = `<p class="correct">✅ ¡Correcto!</p><p><strong>Explicación:</strong> ${currentExercise.explicacion}</p>`
+    showNotification("¡Respuesta Correcta!", "success")
+  } else {
+    feedbackEl.innerHTML = `<p class="incorrect">❌ Incorrecto. La respuesta correcta es: <strong>${currentExercise.respuesta}</strong></p><p><strong>Explicación:</strong> ${currentExercise.explicacion}</p>`
+    showNotification("Inténtalo de nuevo.", "error")
+  }
+}
+
+function showTopicSelection() {
+  console.log("[v0] Mostrando selección de temas")
+  document.getElementById("studyInterface").style.display = "none"
+  document.getElementById("exerciseInterface").style.display = "none"
+  document.getElementById("topicSelection").style.display = "block"
+  currentExercise = null
+  currentTopic = null
+}
+
+// --- Event Listeners ---
+
+function setupEventListeners() {
+  console.log("[v0] Configurando listeners de eventos...")
+
+  document.querySelectorAll(".topic-card").forEach((card) => {
+    card.addEventListener("click", () => {
+      if (window.pythonDisponible) {
+        const topic = card.dataset.topic
+        showStudyMode(topic)
+      } else {
+        showNotification("El entorno de Python aún no está listo.", "info")
+      }
+    })
+  })
+
+  document.getElementById("checkAnswer").addEventListener("click", checkAnswer)
+  document.getElementById("nextExercise").addEventListener("click", () => {
+    if (currentTopic) generateExercise(currentTopic)
+  })
+
+  document.getElementById("backToTopicsBtn").addEventListener("click", showTopicSelection)
+  document.getElementById("backToTopicsFromStudy").addEventListener("click", showTopicSelection)
+}
+
+// --- Punto de Entrada ---
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("[v0] DOM cargado, iniciando aplicación...")
+
+  const pythonIndicator = document.getElementById("pythonIndicator")
+  if (!pythonIndicator) {
+    console.error("[v0] ERROR: No se encontró el elemento pythonIndicator")
+  }
+
+  const topicCards = document.querySelectorAll(".topic-card")
+  console.log("[v0] Tarjetas de temas encontradas:", topicCards.length)
+
+  document.querySelectorAll(".topic-card, .btn").forEach((el) => {
+    el.classList.add("disabled")
+    el.disabled = true
+  })
+
+  setupEventListeners()
+  main()
+})
+
+function startExamMode(topic) {
+  console.log(`[v0] Iniciando modo examen: ${topic}`)
+  showNotification("Función de examen en desarrollo.", "info")
+  startStudyMode(topic)
+}
