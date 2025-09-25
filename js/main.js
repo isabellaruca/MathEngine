@@ -1,13 +1,10 @@
-// --- Variables Globales --
+// --- Variables Globales ---
 let pyodide = null
 let currentExercise = null
 const currentExam = null
 let currentTopic = null
 const userProgress = JSON.parse(localStorage.getItem("mathpro-progress")) || {}
 window.pythonDisponible = false // Variable global para el indicador de estado
-
-// Import Pyodide
-const { loadPyodide } = window
 
 // --- Función Principal de Inicialización ---
 async function main() {
