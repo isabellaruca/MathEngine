@@ -1,4 +1,4 @@
-// --- Variables Globales ---
+// --- Variables Globales --
 let pyodide = null
 let currentExercise = null
 const currentExam = null
