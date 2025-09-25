@@ -21,11 +21,10 @@ async function inicializarEntornoPython() {
     console.log('[INIT] Iniciando carga de Pyodide...');
     indicador.textContent = '🔄 Cargando Entorno Python...';
     
-    // 1. Cargar el motor de Pyodide (ESTA ES LA LÍNEA CORREGIDA)
+    // 1. Cargar el motor de Pyodide, incluyendo el 'indexURL' requerido
     pyodide = await loadPyodide({
         indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/"
     });
-    // --- FIN DE LA CORRECCIÓN ---
 
     console.log('[INIT] Pyodide cargado.');
     indicador.textContent = '🐍 Obteniendo Scripts...';
